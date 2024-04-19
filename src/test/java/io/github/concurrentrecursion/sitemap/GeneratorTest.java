@@ -76,11 +76,9 @@ class GeneratorTest {
     void testTooBig() throws Exception {
         UrlSetSitemap big = new UrlSetSitemap();
         for (int i = 0; i < 10_000; i++) {
-            if(i % 1_000 == 0){
-                log.debug("Adding Url {}",i);
-            }
             big.addUrl(createBigUrl(i));
         }
+        log.debug("Urls added");
         SitemapGenerator generator = new SitemapGenerator().setPrettyPrint(false);
         Path tempDir = Files.createTempDirectory("sitemap");
         assertThrows(DataSerializationException.class,() ->generator.write(big,tempDir));

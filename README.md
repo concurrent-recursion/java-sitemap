@@ -4,7 +4,7 @@ Java-Sitemap
 
 Java Sitemap is a utility project to read and write sitemaps.
 
-It supports reading `<urlset>` and `<sitemapindex>` site maps, as well as locating sitemaps from a `robots.txt` file
+It supports reading and writing `<urlset>` and `<sitemapindex>` site maps, as well as locating sitemaps from a `robots.txt` file
 
 **NOTE: java-sitemap is only compatible with Java 11+**
 
@@ -143,32 +143,6 @@ Path dir = Paths.get("/var/www/example");
 //This will write out the UrlSetSitemaps, and the IndexSitemap to /var/www/example
 generator.write(sitemap, dir);
 ```
-### Custom Locations
-
-```java
-import io.github.concurrentrecursion.sitemap.io.SitemapGenerator;
-import io.github.concurrentrecursion.sitemap.model.IndexSitemap;
-import io.github.concurrentrecursion.sitemap.model.UrlSetSitemap;
-
-import java.net.URI;
-import java.net.URL;
-import java.nio.file.Paths;
-import java.time.OffsetDateTime;
-
-public static void main(String[] args) {
-    SitemapGenerator generator = new SitemapGenerator();
-    Path dir = Paths.get("/var/www/example/sitemaps");
-    URI siteUrl = URI.create("https://www.example.com");
-    UrlSetSitemap blogSitemap = new UrlSetSitemap().setFilename("blogposts.xml");
-    //Add urls
-    UrlSetSitemap staticSitemap = new UrlSetSitemap().setFilename("static.xml");
-    //Add urls
-    IndexSitemap index = new IndexSitemap().setFilename("index.xml")
-        .addUrlSet(blogSitemap, siteUrl.resolve("/sitemaps"), OffsetDateTime.now())
-        .addUrlSet(staticSitemap, siteUrl.resolve("/sitemaps"),OffsetDateTime.now());
-}
-```
-
 
 ## Reading Sitemaps
 
