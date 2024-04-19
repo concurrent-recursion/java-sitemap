@@ -4,7 +4,6 @@ import io.github.concurrentrecursion.exception.DataSerializationException;
 import io.github.concurrentrecursion.sitemap.io.Generator;
 import io.github.concurrentrecursion.sitemap.io.SitemapGenerator;
 import io.github.concurrentrecursion.sitemap.model.ChangeFrequency;
-import io.github.concurrentrecursion.sitemap.model.IndexSitemap;
 import io.github.concurrentrecursion.sitemap.model.Url;
 import io.github.concurrentrecursion.sitemap.model.UrlSetSitemap;
 import io.github.concurrentrecursion.sitemap.model.google.image.Image;
@@ -13,7 +12,6 @@ import io.github.concurrentrecursion.sitemap.model.google.news.Publication;
 import io.github.concurrentrecursion.sitemap.model.google.video.*;
 import io.github.concurrentrecursion.sitemap.model.xhtml.Link;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.N;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
@@ -110,7 +108,7 @@ class GeneratorTest {
         for(int i = 0 ; i < 1 ; i++){
             url.addVideo(new Video().setFamilyFriendly(random.nextBoolean())
                     .setLive(random.nextBoolean())
-                    .setExpirationDate(OffsetDateTime.now().plus(1, ChronoUnit.DAYS))
+                    .setExpirationDate(OffsetDateTime.now().plusDays(1))
                             .setPlatform(new Platform(Relationship.ALLOW,List.of(Platform.Type.TV, Platform.Type.WEB, Platform.Type.MOBILE)))
                             .setRestriction(new Restriction(Relationship.DENY,List.of("NK")))
                             .setRating(3.0)
