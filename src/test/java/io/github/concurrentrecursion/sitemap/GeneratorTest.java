@@ -17,10 +17,8 @@ import org.junit.jupiter.api.Test;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -66,7 +64,7 @@ class GeneratorTest {
         List<Url> urls = List.of(new Url("http://www.example.com/ümlat.php&q=name").setChangeFrequency(ChangeFrequency.NEVER), new Url(URI.create("https://www.example.com/stuff-and-things").toURL()).setPriority(0.1d), new Url("http://www.example.org/business/article55.html").setNews(new News().setTitle("Companies A, B in Merger Talks").setPublicationDate(OffsetDateTime.now()).setPublication(new Publication("The Example Times", "en"))));
         UrlSetSitemap urlSet = new UrlSetSitemap().setUrls(urls).setFilename("gzip-sitemap.xml");
         Generator generator = new SitemapGenerator().setUseGzip(true).setPrettyPrint(false);
-        Path filePath = Paths.get("/vcs/sitemaps");
+        Path filePath = Files.createTempDirectory("sitemaps-test");
         generator.write(urlSet, filePath);
     }
 
