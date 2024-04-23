@@ -4,6 +4,7 @@ import io.github.concurrentrecursion.sitemap.adapters.SpaceDelimitedStringListAd
 import io.github.concurrentrecursion.sitemap.model.validation.WriteValidation;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -54,6 +55,7 @@ public class Restriction {
      */
     @XmlValue
     @XmlJavaTypeAdapter(SpaceDelimitedStringListAdapter.class)
+    @Pattern(regexp = "[A-Z]{2}", groups = WriteValidation.class)
     @NotEmpty(groups = WriteValidation.class)
     @NotNull(groups = WriteValidation.class)
     private List<String> countries = new ArrayList<>();

@@ -2,6 +2,7 @@ package io.github.concurrentrecursion.sitemap.model.google.video;
 
 import io.github.concurrentrecursion.exception.RuntimeMalformedUrlException;
 import io.github.concurrentrecursion.sitemap.adapters.UrlAdapter;
+import io.github.concurrentrecursion.sitemap.model.validation.UrlLengthConstraint;
 import io.github.concurrentrecursion.sitemap.model.validation.WriteValidation;
 import io.github.concurrentrecursion.sitemap.util.UrlUtil;
 import jakarta.validation.constraints.Size;
@@ -29,6 +30,7 @@ public class Uploader {
      */
     @XmlAttribute(name="info")
     @XmlJavaTypeAdapter(UrlAdapter.class)
+    @UrlLengthConstraint(groups = WriteValidation.class)
     private URL uploaderInfoUrl;
 
     /**

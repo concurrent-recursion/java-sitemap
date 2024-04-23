@@ -4,6 +4,7 @@ import io.github.concurrentrecursion.exception.RuntimeMalformedUrlException;
 import io.github.concurrentrecursion.sitemap.adapters.BooleanYesNoAdapter;
 import io.github.concurrentrecursion.sitemap.adapters.OffsetDateTimeAdapter;
 import io.github.concurrentrecursion.sitemap.adapters.UrlAdapter;
+import io.github.concurrentrecursion.sitemap.model.validation.UrlLengthConstraint;
 import io.github.concurrentrecursion.sitemap.model.validation.WriteValidation;
 import io.github.concurrentrecursion.sitemap.util.UrlUtil;
 import jakarta.validation.constraints.*;
@@ -53,6 +54,7 @@ public class Video {
      */
     @XmlElement(name = "thumbnail_loc")
     @XmlJavaTypeAdapter(UrlAdapter.class)
+    @UrlLengthConstraint(groups = WriteValidation.class)
     private URL thumbnailUrl;
     /**
      * The title of the video. It is recommended that this match the video title displayed on the web page where the
@@ -77,6 +79,7 @@ public class Video {
      */
     @XmlElement(name = "content_loc")
     @XmlJavaTypeAdapter(UrlAdapter.class)
+    @UrlLengthConstraint(groups = WriteValidation.class)
     private URL contentUrl;
     /**
      * A URL pointing to a player for a specific video. Usually this is the information in the src attribute of an {@code <embed>} tag.
@@ -85,6 +88,7 @@ public class Video {
      */
     @XmlElement(name = "player_loc")
     @XmlJavaTypeAdapter(UrlAdapter.class)
+    @UrlLengthConstraint(groups = WriteValidation.class)
     private URL playerUrl;
     /**
      * The duration of the video, in seconds. Value must be from 1 to 28800 (8 hours)

@@ -100,7 +100,7 @@ new Url("https://example.com/v/play/3f22c1b")
             .setRating(4.3d)
             .setPlatform(new Platform().setPlatforms(List.of(TV)).setRelationship(Relationship.DENY))
             .setUploader(new Uploader().setUploaderInfoUrl("https://www.youtube.com/grillerman").setName("Grill Erman"))
-            .setRestriction(new Restriction().setRelationship(Relationship.DENY).setCountries(List.of("NK")))
+            .setRestriction(new Restriction().setRelationship(Relationship.DENY).setCountries(List.of("CA")))
             .setExpirationDate(OffsetDateTime.parse("2034-01-01T00:00:00.000Z"))
             .setFamilyFriendly(true)
     ).setChangeFrequency(ChangeFrequency.YEARLY);

@@ -6,17 +6,16 @@ import io.github.concurrentrecursion.sitemap.adapters.UrlAdapter;
 import io.github.concurrentrecursion.sitemap.model.google.image.Image;
 import io.github.concurrentrecursion.sitemap.model.google.news.News;
 import io.github.concurrentrecursion.sitemap.model.google.video.Video;
+import io.github.concurrentrecursion.sitemap.model.validation.UrlLengthConstraint;
 import io.github.concurrentrecursion.sitemap.model.validation.WriteValidation;
 import io.github.concurrentrecursion.sitemap.model.xhtml.Link;
 import io.github.concurrentrecursion.sitemap.util.UrlUtil;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import jakarta.xml.bind.annotation.*;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import lombok.Data;
+import lombok.Locked;
 import lombok.experimental.Accessors;
 
 import java.net.URL;
@@ -50,6 +49,7 @@ public class Url {
     @XmlElement(required = true, name = "loc")
     @XmlSchemaType(name = "anyURI")
     @XmlJavaTypeAdapter(UrlAdapter.class)
+    @UrlLengthConstraint(groups = WriteValidation.class)
     private URL location;
 
     /**

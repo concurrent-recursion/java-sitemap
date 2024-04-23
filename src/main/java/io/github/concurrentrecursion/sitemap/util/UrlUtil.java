@@ -1,10 +1,13 @@
 package io.github.concurrentrecursion.sitemap.util;
 
 import io.github.concurrentrecursion.exception.RuntimeMalformedUrlException;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import lombok.experimental.UtilityClass;
 
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 /**
@@ -20,10 +23,11 @@ public class UrlUtil {
      * @return the converted URL
      * @throws RuntimeMalformedUrlException if the url is malformed
      */
-    public URL convertToUrl(String location) throws RuntimeMalformedUrlException{
+    @NotNull
+    public URL convertToUrl(@NotNull String location) throws RuntimeMalformedUrlException {
         try {
-            return URI.create(location).toURL();
-        } catch (MalformedURLException e) {
+            return new URI(location).toURL();
+        } catch (MalformedURLException | URISyntaxException | IllegalArgumentException e) {
             throw new RuntimeMalformedUrlException(e);
         }
     }

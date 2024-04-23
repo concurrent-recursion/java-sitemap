@@ -58,6 +58,7 @@
         <jaxb-bind-api.version>4.0.2</jaxb-bind-api.version>
         <jaxb-impl.version>4.0.5</jaxb-impl.version>
         <mockito.version>5.2.0</mockito.version>
+        <xmlunit.version>2.9.1</xmlunit.version>
     </properties>
 
     <dependencies>
@@ -126,6 +127,19 @@
             <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.xmlunit</groupId>
+            <artifactId>xmlunit-core</artifactId>
+            <version>${xmlunit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.xmlunit</groupId>
+            <artifactId>xmlunit-matchers</artifactId>
+            <version>${xmlunit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

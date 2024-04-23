@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -20,6 +21,8 @@ import java.util.List;
 @Data
 @Accessors(chain = true)
 public class Platform {
+
+    public Platform(){}
 
     /**
      * Create a platform with the given relationship and platforms
@@ -48,7 +51,7 @@ public class Platform {
     @NotEmpty(groups = WriteValidation.class)
     @NotNull(groups = WriteValidation.class)
     @XmlJavaTypeAdapter(SpaceDelimitedPlatformTypeAdapter.class)
-    private List<Type> platforms;
+    private List<Type> platforms = new ArrayList<>();
 
     /**
      * The platforms the relationship applies to

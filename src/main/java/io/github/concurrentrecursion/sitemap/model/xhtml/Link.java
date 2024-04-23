@@ -2,7 +2,10 @@ package io.github.concurrentrecursion.sitemap.model.xhtml;
 
 import io.github.concurrentrecursion.exception.RuntimeMalformedUrlException;
 import io.github.concurrentrecursion.sitemap.adapters.UrlAdapter;
+import io.github.concurrentrecursion.sitemap.model.validation.UrlLengthConstraint;
+import io.github.concurrentrecursion.sitemap.model.validation.WriteValidation;
 import io.github.concurrentrecursion.sitemap.util.UrlUtil;
+import jakarta.validation.constraints.Pattern;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -32,6 +35,7 @@ public class Link {
      * @return the language code
      */
     @XmlAttribute(name = "hreflang")
+    @Pattern(regexp = "^[a-z]{2}(-[A-Z]{2})?$", message = "language must be a ISO639 language code")
     private String language;
     /**
      * The link
@@ -39,6 +43,7 @@ public class Link {
      */
     @XmlAttribute
     @XmlJavaTypeAdapter(UrlAdapter.class)
+    @UrlLengthConstraint(groups = WriteValidation.class)
     private URL href;
 
     /**

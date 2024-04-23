@@ -33,6 +33,11 @@ public class Publication {
     private String language;
 
     /**
+     * Represents a publication that publishes a news article.
+     */
+    public Publication(){}
+
+    /**
      * Create a publication with the given name and language code
      * @param name The publication name
      * @param language The publication language

@@ -53,13 +53,31 @@ public class SitemapReader implements Reader{
 
 
     public List<Sitemap> readSitemaps(Robots robots) throws IOException {
-        return robots.getSitemapUrls().stream().map(this::readSitemap).collect(Collectors.toList());
+        return robots.getSitemapUrls().stream().map(this::read).collect(Collectors.toList());
     }
 
+    private Sitemap unmarshal(final InputStream inputStream){
+        try {
+            Unmarshaller unmarshaller = JAXB_CONTEXT.createUnmarshaller();
+            return (Sitemap) unmarshaller.unmarshal(new StreamSource(inputStream));
+        }catch (JAXBException e){
+            throw new DataAccessException(e);
+        }
+    }
+
+    private <T> T unmarshal(final InputStream inputStream, final Class<T> clazz){
+        try {
+            Unmarshaller unmarshaller = JAXB_CONTEXT.createUnmarshaller();
+            return unmarshaller.unmarshal(new StreamSource(inputStream), clazz).getValue();
+        }catch (JAXBException e){
+            throw new DataAccessException(e);
+        }
+    }
     private <T> T unmarshal(URL url, Class<T> clazz){
         try {
             Unmarshaller unmarshaller = JAXB_CONTEXT.createUnmarshaller();
             URLConnection urlConnection = getConnection(url);
+            log.trace("Requesting URL: {}", urlConnection.getURL());
             try (InputStream inputStream = urlConnection.getInputStream()) {
                 return unmarshaller.unmarshal(new StreamSource(inputStream), clazz).getValue();
             }
@@ -68,21 +86,17 @@ public class SitemapReader implements Reader{
         }
     }
 
-    private Object unmarshal(URL url){
+    private Sitemap unmarshal(URL url){
         try {
             Unmarshaller unmarshaller = JAXB_CONTEXT.createUnmarshaller();
             URLConnection urlConnection = getConnection(url);
+            log.trace("Requesting URL: {}", urlConnection.getURL());
             try (InputStream inputStream = urlConnection.getInputStream()) {
-                return unmarshaller.unmarshal(new StreamSource(inputStream));
+                return (Sitemap) unmarshaller.unmarshal(new StreamSource(inputStream));
             }
         }catch (IOException | JAXBException e){
             throw new DataAccessException(e);
         }
-    }
-
-    @Override
-    public Sitemap readSitemap(URL sitemapUrl){
-        return (Sitemap) unmarshal(sitemapUrl);
     }
 
     @Override
@@ -91,13 +105,28 @@ public class SitemapReader implements Reader{
     }
 
     @Override
+    public IndexSitemap readSitemapIndex(InputStream inputStream) {
+        return unmarshal(inputStream,IndexSitemap.class);
+    }
+
+    @Override
     public Sitemap read(final URL url) {
-        return unmarshal(url, Sitemap.class);
+        return unmarshal(url);
+    }
+
+    @Override
+    public Sitemap read(InputStream inputStream) {
+        return unmarshal(inputStream);
     }
 
     @Override
     public UrlSetSitemap readUrlSet(final URL url) {
         return unmarshal(url, UrlSetSitemap.class);
+    }
+
+    @Override
+    public UrlSetSitemap readUrlSet(InputStream inputStream) {
+        return unmarshal(inputStream, UrlSetSitemap.class);
     }
 
     @Override

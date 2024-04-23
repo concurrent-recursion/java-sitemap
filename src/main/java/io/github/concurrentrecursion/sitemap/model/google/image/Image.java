@@ -2,6 +2,8 @@ package io.github.concurrentrecursion.sitemap.model.google.image;
 
 import io.github.concurrentrecursion.exception.RuntimeMalformedUrlException;
 import io.github.concurrentrecursion.sitemap.adapters.UrlAdapter;
+import io.github.concurrentrecursion.sitemap.model.validation.UrlLengthConstraint;
+import io.github.concurrentrecursion.sitemap.model.validation.WriteValidation;
 import io.github.concurrentrecursion.sitemap.util.UrlUtil;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -26,6 +28,7 @@ public class Image {
      */
     @XmlElement(name = "loc",required = true)
     @XmlJavaTypeAdapter(UrlAdapter.class)
+    @UrlLengthConstraint(groups = WriteValidation.class)
     private URL location;
 
     /**

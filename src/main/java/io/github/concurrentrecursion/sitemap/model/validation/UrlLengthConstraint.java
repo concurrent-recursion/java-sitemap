@@ -8,18 +8,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Validates a list of Urls to ensure that there are not more than "max" news entries
- */
 @Target(ElementType.FIELD)
-@Constraint(validatedBy = MaxNewsConstraintValidator.class)
+@Constraint(validatedBy = UrlLengthConstraintValidator.class)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MaxNewsConstraint {
+public @interface UrlLengthConstraint {
     /**
      * The error message if the validation fails
      * @return the message
      */
-    String message() default "UrlSet cannot contain more than 1000 news items";
+    String message() default "Url cannot be longer than 2048 characters";
 
     /**
      * The validation groups
@@ -35,8 +32,8 @@ public @interface MaxNewsConstraint {
     Class<? extends Payload>[] payload() default {};
 
     /**
-     * The maximum number of news items in the list. -1 disables max validation
-     * @return the max
+     * The maximum length of a URL. -1 disables max validation
+     * @return the max length
      */
-    int max() default 1000;
+    int max() default 2048;
 }

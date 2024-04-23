@@ -4,9 +4,12 @@ import io.github.concurrentrecursion.robots.Robots;
 import io.github.concurrentrecursion.sitemap.model.IndexSitemap;
 import io.github.concurrentrecursion.sitemap.model.Sitemap;
 import io.github.concurrentrecursion.sitemap.model.UrlSetSitemap;
+import jakarta.validation.constraints.NotNull;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.List;
 
 /**
@@ -14,13 +17,7 @@ import java.util.List;
  */
 public interface Reader {
 
-    /**
-     * Reads a sitemap file from the specified URL and returns a {@link Sitemap} object representing the sitemap.
-     *
-     * @param sitemapUrl The URL of the sitemap file.
-     * @return The {@link Sitemap} object representing the sitemap file.
-     */
-    Sitemap readSitemap(URL sitemapUrl);
+
 
     /**
      * Reads the given sitemap, and resolves it to a concrete UrlSetSitemap.<br>
@@ -48,6 +45,14 @@ public interface Reader {
     IndexSitemap readSitemapIndex(URL url);
 
     /**
+     * Reads a sitemap index file from an inputstream.
+     *
+     * @param inputStream An inputstream of the sitemap index file.
+     * @return The {@link IndexSitemap} object representing the sitemap index.
+     */
+    IndexSitemap readSitemapIndex(InputStream inputStream);
+
+    /**
      * Reads a sitemap file from the specified URL and returns a {@link Sitemap} object representing the sitemap.<br>
      * This is useful for when you don't know if the given URL is a &lt;urlset&gt; or a &lt;sitemapindex&gt;
      *
@@ -56,13 +61,31 @@ public interface Reader {
      */
     Sitemap read(final URL url);
 
+
+    /**
+     * Reads a sitemap from the InputStream and returns a {@link Sitemap} object representing the sitemap.<br>
+     * This is useful for when you don't know if the given URL is a &lt;urlset&gt; or a &lt;sitemapindex&gt;
+     *
+     * @param inputStream an inputstream to the sitemap
+     * @return The {@link Sitemap} object representing the sitemap file.
+     */
+    Sitemap read(final InputStream inputStream);
+
     /**
      * Reads a sitemap file from the specified URL and returns a {@link UrlSetSitemap} object representing the sitemap.
      *
      * @param url The URL of the sitemap file.
      * @return The {@link UrlSetSitemap} object representing the sitemap file.
      */
-    UrlSetSitemap readUrlSet(final URL url);
+    UrlSetSitemap readUrlSet(@NotNull final URL url);
+
+    /**
+     * Reads a sitemap file from the specified InputStream and returns a {@link UrlSetSitemap} object representing the sitemap.
+     *
+     * @param inputStream An inputstream to the urlset
+     * @return The {@link UrlSetSitemap} object representing the sitemap file.
+     */
+    UrlSetSitemap readUrlSet(@NotNull final InputStream inputStream);
     /**
      * Sets the connection timeout value. This is the maximum time that the reader will attempt to establish a connection
      * before throwing an exception.
