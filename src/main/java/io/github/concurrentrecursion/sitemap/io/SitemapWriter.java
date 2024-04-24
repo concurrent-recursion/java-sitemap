@@ -18,7 +18,11 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.*;
+
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.StringWriter;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,7 +35,7 @@ import java.util.zip.GZIPOutputStream;
 @Data
 @Accessors(chain = true)
 @Slf4j
-public class SitemapGenerator implements Generator {
+public class SitemapWriter implements Writer {
     private static final long MAX_FILESIZE = 50L * 1024L * 1024L;// 50MB in bytes
     private static final JAXBContext JAXB_CONTEXT;
     @Getter(AccessLevel.NONE)
@@ -99,12 +103,9 @@ public class SitemapGenerator implements Generator {
     }
 
     @Override
-    public void write(IndexSitemap index, Path directory) throws IOException {
+    public void write(IndexSitemap index, Path file) throws IOException {
         validate(index);
-        for(UrlSetSitemap urlSet : index.getAllUrlSets()){
-            write(urlSet, directory.resolve(urlSet.getFilename()));
-        }
-        try(OutputStream os = getOutputStream(directory)){
+        try(OutputStream os = getOutputStream(file)){
             marshal(index,os);
         }
     }
@@ -160,14 +161,13 @@ public class SitemapGenerator implements Generator {
     }
 
     @Override
-    public void write(UrlSetSitemap urlSet, Path directory) throws IOException {
+    public void write(UrlSetSitemap urlSet, Path file) throws IOException {
         validate(urlSet);
-        String filename = urlSet.getFilename();
-        if(useGzip && !(filename.endsWith(".gz") || filename.endsWith(".gzip"))){
-            filename = filename + ".gz";
+        if(useGzip && !(file.getFileName().endsWith(".gz") || file.getFileName().endsWith(".gzip"))){
+            file = file.resolveSibling(file.getFileName() + ".gz");
         }
-        final Path sitemapFile = directory.resolve(filename);
-        try(OutputStream os = getOutputStream(sitemapFile)){
+        urlSet.setFile(file);
+        try(OutputStream os = getOutputStream(file)){
             marshal(urlSet,os);
         }
     }
@@ -178,7 +178,7 @@ public class SitemapGenerator implements Generator {
     }
 
     @Override
-    public Generator useGzipCompression(boolean gzip) {
+    public Writer useGzipCompression(boolean gzip) {
         this.useGzip = gzip;
         return this;
     }
@@ -189,13 +189,13 @@ public class SitemapGenerator implements Generator {
     }
 
     @Override
-    public Generator setBaseUrl(String baseUrl) {
+    public Writer setBaseUrl(String baseUrl) {
         this.baseUrl = UrlUtil.convertToUrl(baseUrl);
         return this;
     }
 
     @Override
-    public Generator setBaseUrl(URL baseUrl) {
+    public Writer setBaseUrl(URL baseUrl) {
         this.baseUrl = baseUrl;
         return this;
     }
@@ -218,7 +218,7 @@ public class SitemapGenerator implements Generator {
     }
 
 
-    private void marshal(Object obj, Writer writer){
+    private void marshal(Object obj, java.io.Writer writer){
         try {
             getMarshaller().marshal(obj, writer);
         }catch (JAXBException e){

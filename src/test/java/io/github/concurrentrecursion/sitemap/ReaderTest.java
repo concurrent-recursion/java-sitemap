@@ -1,24 +1,42 @@
 package io.github.concurrentrecursion.sitemap;
 
-import io.github.concurrentrecursion.UrlMockUtil;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import io.github.concurrentrecursion.sitemap.io.SitemapReader;
 import io.github.concurrentrecursion.sitemap.model.*;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
-import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.time.OffsetDateTime;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@WireMockTest(proxyMode = true)
+@Slf4j
 class ReaderTest {
+
+    private static final URL SITEMAP_URL;
+
+    static {
+        try {
+            SITEMAP_URL = URI.create("http://www.example.com/sitemap.xml").toURL();
+        }catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+
 
     @Test
     void testReadUrlsetSitemap() throws Exception{
+        stubFor(get("/sitemap.xml").withHost(equalTo("www.example.com")).willReturn(ok().withHeader("Content-Type","text/xml;charset=utf-8").withBodyFile("sitemaps/minimal-sitemap.xml")));
         SitemapReader reader = new SitemapReader();
-        URL mockUrl = UrlMockUtil.mockUrl(HttpURLConnection.HTTP_OK,() -> Thread.currentThread().getContextClassLoader().getResourceAsStream("minimal-sitemap.xml"));
-        Sitemap sitemap = reader.read(mockUrl);
+        Sitemap sitemap = reader.read(SITEMAP_URL);
         assertInstanceOf(UrlSetSitemap.class, sitemap);
         UrlSetSitemap urlSetSitemap = (UrlSetSitemap) sitemap;
         assertEquals(1,urlSetSitemap.getUrls().size());
@@ -30,10 +48,26 @@ class ReaderTest {
     }
 
     @Test
-    void testReadIndexSitemap() throws Exception{
+    void testReadUrlsetSitemapDirect() throws Exception{
+        stubFor(get("/sitemap.xml").withHost(equalTo("www.example.com")).willReturn(ok().withHeader("Content-Type","text/xml;charset=utf-8").withBodyFile("sitemaps/minimal-sitemap.xml")));
+
         SitemapReader reader = new SitemapReader();
-        URL mockUrl = UrlMockUtil.mockUrl(HttpURLConnection.HTTP_OK,() -> Thread.currentThread().getContextClassLoader().getResourceAsStream("index-sitemap.xml"));
-        Sitemap sitemap = reader.read(mockUrl);
+
+        UrlSetSitemap urlSetSitemap = reader.readUrlSet(SITEMAP_URL);
+        assertEquals(1,urlSetSitemap.getUrls().size());
+        Url site = urlSetSitemap.getUrls().get(0);
+        assertEquals(0.5,site.getPriority());
+        assertNotNull(site.getLocation());
+        assertEquals(ChangeFrequency.MONTHLY,site.getChangeFrequency());
+        assertEquals(0,OffsetDateTime.parse("2022-06-04T00:00:00.000Z").compareTo(site.getLastModifiedDate()));
+    }
+
+    @Test
+    void testReadIndexSitemap() throws Exception{
+        stubFor(get("/sitemap.xml").withHost(equalTo("www.example.com")).willReturn(ok().withHeader("Content-Type","text/xml;charset=utf-8").withBodyFile("sitemaps/index-sitemap.xml")));
+
+        SitemapReader reader = new SitemapReader();
+        Sitemap sitemap = reader.read(SITEMAP_URL);
         assertInstanceOf(IndexSitemap.class, sitemap);
         IndexSitemap indexSitemap = (IndexSitemap) sitemap;
         assertEquals(2,indexSitemap.getSitemapReferences().size());
@@ -43,10 +77,26 @@ class ReaderTest {
     }
 
     @Test
-    void testReadVideo() throws Exception{
+    void testReadIndexSitemapDirect() throws Exception{
+        stubFor(get("/sitemap.xml")
+                .withHost(equalTo("www.example.com"))
+                .willReturn(ok().withHeader("Content-Type","text/xml;charset=utf-8")
+                        .withBodyFile("sitemaps/index-sitemap.xml")));
+
         SitemapReader reader = new SitemapReader();
-        URL mockUrl = UrlMockUtil.mockUrl(HttpURLConnection.HTTP_OK,() -> Thread.currentThread().getContextClassLoader().getResourceAsStream("video-sitemap.xml"));
-        Sitemap sitemap = reader.read(mockUrl);
+        IndexSitemap indexSitemap = reader.readSitemapIndex(SITEMAP_URL);
+        assertEquals(2,indexSitemap.getSitemapReferences().size());
+        SitemapReference site = indexSitemap.getSitemapReferences().get(0);
+        assertEquals("http://www.example.com/sitemap1.xml.gz",site.getLocation().toString());
+        assertEquals(0,OffsetDateTime.parse("2004-10-01T18:23:17.000Z").compareTo(site.getLastModifiedDate()));
+    }
+
+    @Test
+    void testReadVideo() throws Exception{
+        stubFor(get("/sitemap.xml").withHost(equalTo("www.example.com")).willReturn(ok().withHeader("Content-Type","text/xml;charset=utf-8").withBodyFile("sitemaps/video-sitemap.xml")));
+
+        SitemapReader reader = new SitemapReader();
+        Sitemap sitemap = reader.read(SITEMAP_URL);
         assertInstanceOf(UrlSetSitemap.class, sitemap);
         UrlSetSitemap videoSitemap = (UrlSetSitemap) sitemap;
         assertEquals(3, videoSitemap.getUrls().size());
@@ -58,16 +108,17 @@ class ReaderTest {
     @Test
     void testReadDeprecated(){
         SitemapReader reader = new SitemapReader();
-        UrlSetSitemap sitemap = reader.readUrlSet(Thread.currentThread().getContextClassLoader().getResourceAsStream("image-sitemap-withdeprecated.xml"));
+        UrlSetSitemap sitemap = reader.readUrlSet(Thread.currentThread().getContextClassLoader().getResourceAsStream("__files/sitemaps/image-sitemap-withdeprecated.xml"));
         assertEquals(2,sitemap.getUrls().size());
         assertEquals(2,sitemap.getUrls().get(0).getImages().size());
     }
 
     @Test
     void testReadNews() throws Exception{
+        stubFor(get("/sitemap.xml").withHost(equalTo("www.example.com")).willReturn(ok().withHeader("Content-Type","text/xml;charset=utf-8").withBodyFile("sitemaps/news-sitemap.xml")));
+
         SitemapReader reader = new SitemapReader();
-        URL mockUrl = UrlMockUtil.mockUrl(HttpURLConnection.HTTP_OK,() -> Thread.currentThread().getContextClassLoader().getResourceAsStream("news-sitemap.xml"));
-        Sitemap sitemap = reader.read(mockUrl);
+        Sitemap sitemap = reader.read(SITEMAP_URL);
         assertInstanceOf(UrlSetSitemap.class, sitemap);
         UrlSetSitemap videoSitemap = (UrlSetSitemap) sitemap;
         assertEquals(1, videoSitemap.getUrls().size());
@@ -79,7 +130,7 @@ class ReaderTest {
     void testReadSitemapFromInputStream() throws Exception{
         SitemapReader reader = new SitemapReader();
         Sitemap sitemap = null;
-        try(InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("minimal-sitemap.xml")) {
+        try(InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("__files/sitemaps/minimal-sitemap.xml")) {
             sitemap = reader.read(is);
         }
         assertNotNull(sitemap);
@@ -90,7 +141,7 @@ class ReaderTest {
     void testReadIndexSitemapFromInputStream() throws Exception{
         SitemapReader reader = new SitemapReader();
         Sitemap sitemap = null;
-        try(InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("index-sitemap.xml")) {
+        try(InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("__files/sitemaps/index-sitemap.xml")) {
             sitemap = reader.read(is);
         }
         assertNotNull(sitemap);

@@ -1,7 +1,7 @@
 package io.github.concurrentrecursion.sitemap.io;
 
 import io.github.concurrentrecursion.exception.DataAccessException;
-import io.github.concurrentrecursion.robots.Robots;
+import io.github.concurrentrecursion.robots.RobotsTxtReader;
 import io.github.concurrentrecursion.sitemap.model.IndexSitemap;
 import io.github.concurrentrecursion.sitemap.model.Sitemap;
 import io.github.concurrentrecursion.sitemap.model.UrlSetSitemap;
@@ -16,9 +16,15 @@ import lombok.extern.slf4j.Slf4j;
 import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,11 +35,11 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class SitemapReader implements Reader{
+public class SitemapReader implements Reader {
     private static final JAXBContext JAXB_CONTEXT;
 
-    private int connectionTimeout;
-    private int readTimeout;
+    private Duration connectionTimeout = Duration.ofSeconds(5);
+    private Duration readTimeout = Duration.ofSeconds(5);
 
     static {
         try {
@@ -43,18 +49,13 @@ public class SitemapReader implements Reader{
         }
     }
 
-    private HttpURLConnection getConnection(URL url) throws IOException {
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setConnectTimeout(connectionTimeout);
-        urlConnection.setReadTimeout(readTimeout);
-        urlConnection.setRequestProperty("User-Agent", "SitemapReader");
-        return urlConnection;
+    private HttpResponse<InputStream> getConnection(URL url) throws IOException, URISyntaxException, InterruptedException {
+        HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).connectTimeout(connectionTimeout).build();
+        HttpRequest request = HttpRequest.newBuilder(url.toURI()).timeout(readTimeout).header("User-Agent", "SitemapReader").build();
+        return httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
     }
 
 
-    public List<Sitemap> readSitemaps(Robots robots) throws IOException {
-        return robots.getSitemapUrls().stream().map(this::read).collect(Collectors.toList());
-    }
 
     private Sitemap unmarshal(final InputStream inputStream){
         try {
@@ -76,12 +77,13 @@ public class SitemapReader implements Reader{
     private <T> T unmarshal(URL url, Class<T> clazz){
         try {
             Unmarshaller unmarshaller = JAXB_CONTEXT.createUnmarshaller();
-            URLConnection urlConnection = getConnection(url);
-            log.trace("Requesting URL: {}", urlConnection.getURL());
-            try (InputStream inputStream = urlConnection.getInputStream()) {
+            try (InputStream inputStream = getConnection(url).body()) {
                 return unmarshaller.unmarshal(new StreamSource(inputStream), clazz).getValue();
             }
-        }catch (IOException | JAXBException e){
+        }catch (IOException | JAXBException | URISyntaxException e){
+            throw new DataAccessException(e);
+        }catch (InterruptedException e){
+            Thread.currentThread().interrupt();
             throw new DataAccessException(e);
         }
     }
@@ -89,12 +91,13 @@ public class SitemapReader implements Reader{
     private Sitemap unmarshal(URL url){
         try {
             Unmarshaller unmarshaller = JAXB_CONTEXT.createUnmarshaller();
-            URLConnection urlConnection = getConnection(url);
-            log.trace("Requesting URL: {}", urlConnection.getURL());
-            try (InputStream inputStream = urlConnection.getInputStream()) {
+            try (InputStream inputStream = getConnection(url).body()) {
                 return (Sitemap) unmarshaller.unmarshal(new StreamSource(inputStream));
             }
-        }catch (IOException | JAXBException e){
+        }catch (IOException | JAXBException | URISyntaxException e){
+            throw new DataAccessException(e);
+        }catch (InterruptedException e){
+            Thread.currentThread().interrupt();
             throw new DataAccessException(e);
         }
     }

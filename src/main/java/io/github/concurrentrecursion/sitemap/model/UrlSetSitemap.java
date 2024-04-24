@@ -8,6 +8,8 @@ import jakarta.xml.bind.annotation.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,7 +32,7 @@ public class UrlSetSitemap implements Sitemap {
      * @return the filename
      */
     @XmlTransient
-    private String filename = "sitemap.xml";
+    private Path file = Paths.get("sitemap.xml");
 
     /**
      * The urls contained in this UrlSet

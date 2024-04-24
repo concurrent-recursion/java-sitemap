@@ -1,20 +1,16 @@
 package io.github.concurrentrecursion.sitemap;
 
 import io.github.concurrentrecursion.exception.DataSerializationException;
-import io.github.concurrentrecursion.sitemap.io.Generator;
-import io.github.concurrentrecursion.sitemap.io.SitemapGenerator;
-import io.github.concurrentrecursion.sitemap.model.ChangeFrequency;
-import io.github.concurrentrecursion.sitemap.model.Url;
-import io.github.concurrentrecursion.sitemap.model.UrlSetSitemap;
+import io.github.concurrentrecursion.sitemap.io.Writer;
+import io.github.concurrentrecursion.sitemap.io.SitemapWriter;
+import io.github.concurrentrecursion.sitemap.model.*;
 import io.github.concurrentrecursion.sitemap.model.google.image.Image;
 import io.github.concurrentrecursion.sitemap.model.google.news.News;
 import io.github.concurrentrecursion.sitemap.model.google.news.Publication;
 import io.github.concurrentrecursion.sitemap.model.google.video.*;
 import io.github.concurrentrecursion.sitemap.model.xhtml.Link;
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 import org.xmlunit.matchers.CompareMatcher;
 
@@ -23,6 +19,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -30,8 +27,7 @@ import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 class GeneratorTest {
@@ -46,7 +42,7 @@ class GeneratorTest {
 
     @Test
     void testUrlEncoding() throws Exception {
-        final SitemapGenerator generator = new SitemapGenerator().setPrettyPrint(false);
+        final SitemapWriter generator = new SitemapWriter().setPrettyPrint(false);
         final String testUrl = "http://www.example.com/ümlat.php&q=name";
         final String expectedUrl = "<urlset " + XMLNS + "><url><loc>http://www.example.com/%C3%BCmlat.php&amp;q=name</loc></url></urlset>";
 
@@ -60,7 +56,7 @@ class GeneratorTest {
 
     @Test
     void testUrlTooLong() {
-        final SitemapGenerator generator = new SitemapGenerator().setPrettyPrint(false);
+        final SitemapWriter generator = new SitemapWriter().setPrettyPrint(false);
         final String testUrl = "http://www.example.com/pages/a-really-long-url-that-is-not-a-good-idea-but/we-are-doing-it-anyway/for-no-real-reason/lorem-ipsum-dolor-sit-amet,-consectetuer-adipiscing-elit-aenean-commodo-ligula-eget-dolor-aenean-massa-cum-sociis-natoque-penatibus-et-magnis-dis-parturient-montes,-nascetur-ridiculus-mus-donec-quam-felis,-ultricies-nec,-pellentesque-eu,-pretium-quis,-sem-nulla-consequat-massa-quis-enim-donec-pede-justo,-fringilla-vel,-aliquet-nec,-vulputate-eget,-arcu-in-enim-justo,-rhoncus-ut,-imperdiet-a,-venenatis-vitae,-justo-nullam-dictum-felis-eu-pede-mollis-pretium-integer-tincidunt-cras-dapibus-vivamus-elementum-semper-nisi-aenean-vulputate-eleifend-tellus-aenean-leo-ligula,-porttitor-eu,-consequat-vitae,-eleifend-ac,-enim-aliquam-lorem-ante,-dapibus-in,-viverra-quis,-feugiat-a,-tellus-phasellus-viverra-nulla-ut-metus-varius-laoreet-quisque-rutrum-aenean-imperdiet-etiam-ultricies-nisi-vel-augue-curabitur-ullamcorper-ultricies-nisi-nam-eget-dui-etiam-rhoncus-maecenas-tempus,-tellus-eget-condimentum-rhoncus,-sem-quam-semper-libero,-sit-amet-adipiscing-sem-neque-sed-ipsum-nam-quam-nunc,-blandit-vel,-luctus-pulvinar,-hendrerit-id,-lorem-maecenas-nec-odio-et-ante-tincidunt-tempus-donec-vitae-sapien-ut-libero-venenatis-faucibus-nullam-quis-ante-etiam-sit-amet-orci-eget-eros-faucibus-tincidunt-duis-leo-sed-fringilla-mauris-sit-amet-nibh-donec-sodales-sagittis-magna-sed-consequat,-leo-eget-bibendum-sodales,-augue-velit-cursus-nunc,-quis-gravida-magna-mi-a-libero-fusce-vulputate-eleifend-sapien-vestibulum-purus-quam,-scelerisque-ut,-mollis-sed,-nonummy-id,-metus-nullam-accumsan-lorem-in-dui-cras-ultricies-mi-eu-turpis-hendrerit-fringilla-vestibulum-ante-ipsum-primis-in-faucibus-orci-luctus-et-ultrices-posuere-cubilia-curae;-in-ac-dui-quis-mi-consectetuer-lacinia-nam-pretium-turpis-et-arcu-duis-arcu-tortor,-suscipit-eget,-imperdiet-nec,-imperdiet-iaculis,-ipsum-sed-aliquam-ultrices-mauris-integer-ante-arcu,-accumsan-a,-consectetuer-eget,-posuere-ut,-mauris-praesent-adipiscing-phasellus-ullamcorper-ipsum-rutrum-nunc-nunc-nonummy-metus-vestibulum-volutpat-pretium-libero-cras-id-dui-aenea";
         final UrlSetSitemap urlSet = UrlSetSitemap.fromUrls(new Url(testUrl));
         assertThrows(ConstraintViolationException.class, () -> generator.writeToString(urlSet));
@@ -83,7 +79,7 @@ class GeneratorTest {
                         .setTitle("Companies A, B in Merger Talks")
                 )
         );
-        Generator generator = new SitemapGenerator();
+        Writer generator = new SitemapWriter();
         String result = generator.writeToString(urlSet);
         String expected =
                 "<urlset " + XMLNS + ">" +
@@ -111,7 +107,7 @@ class GeneratorTest {
                                 .addImage(new Image("https://example.com/photo.jpg")))
                 .addUrl(new Url("https://example.com/sample2.html")
                         .addImage(new Image("https://example.com/picture.jpg")));
-        Generator generator = new SitemapGenerator();
+        Writer generator = new SitemapWriter();
         String expected = "<urlset " + XMLNS + "><url><loc>https://example.com/sample1.html</loc><image:image><image:loc>https://example.com/image.jpg</image:loc></image:image><image:image><image:loc>https://example.com/photo.jpg</image:loc></image:image></url><url><loc>https://example.com/sample2.html</loc><image:image><image:loc>https://example.com/picture.jpg</image:loc></image:image></url></urlset>";
         assertThat(generator.writeToString(urlSet),CompareMatcher.isIdenticalTo(expected).ignoreWhitespace());
     }
@@ -124,12 +120,13 @@ class GeneratorTest {
                         .setLastModifiedDate(OffsetDateTime.parse("2005-01-01T00:00:00.000Z"))
                         .setPriority(0.8)
         );
-        UrlSetSitemap urlSet = new UrlSetSitemap().setUrls(urls).setFilename("gzip-sitemap.xml");
-        Generator generator = new SitemapGenerator().setUseGzip(true).setPrettyPrint(false);
-        Path filePath = Files.createTempDirectory("sitemaps-test");
+        final Path filePath = Files.createTempDirectory("sitemaps-test");
+        UrlSetSitemap urlSet = new UrlSetSitemap().setUrls(urls).setFile(filePath.resolve("gzip-sitemap.xml"));
+        Writer generator = new SitemapWriter().setUseGzip(true).setPrettyPrint(false);
+
         generator.write(urlSet, filePath);
         StringBuilder result = new StringBuilder();
-        try(GZIPInputStream in = new GZIPInputStream(Files.newInputStream(filePath.resolve(urlSet.getFilename() + ".gz"))); BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+        try(GZIPInputStream in = new GZIPInputStream(Files.newInputStream(urlSet.getFile())); BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             String line;
             while((line = reader.readLine()) != null){
                 result.append(line);
@@ -147,7 +144,7 @@ class GeneratorTest {
             big.addUrl(createBigUrl(i));
         }
         log.debug("Urls added");
-        SitemapGenerator generator = new SitemapGenerator().setPrettyPrint(false);
+        SitemapWriter generator = new SitemapWriter().setPrettyPrint(false);
         Path tempDir = Files.createTempDirectory("sitemap");
         assertThrows(DataSerializationException.class,() ->generator.write(big,tempDir));
     }
@@ -191,7 +188,19 @@ class GeneratorTest {
         return url;
     }
 
+    @Test
+    void testSitemapIndex() throws Exception {
+        IndexSitemap index = new IndexSitemap();
+        List<SitemapReference> references = index.getSitemapReferences();
+        SitemapReference ref = new SitemapReference().setLocation(URI.create("https://www.example.com/sitemap-1.xml").toURL()).setLastModifiedDate(OffsetDateTime.now());
+        ref.setSitemap(new UrlSetSitemap().addUrl(new Url("https://www.example.com/page/page1.html")));
+        references.add(ref);
 
+        SitemapWriter generator = new SitemapWriter().setPrettyPrint(false);
+        final Path tempDir = Files.createTempDirectory("sitemap").resolve("sitemap.xml");
+        generator.write(index,tempDir);
+        assertTrue(Files.exists(tempDir));
+    }
 
 
 }

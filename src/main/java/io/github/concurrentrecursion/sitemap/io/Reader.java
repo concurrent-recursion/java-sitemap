@@ -1,6 +1,6 @@
 package io.github.concurrentrecursion.sitemap.io;
 
-import io.github.concurrentrecursion.robots.Robots;
+import io.github.concurrentrecursion.robots.RobotsTxtReader;
 import io.github.concurrentrecursion.sitemap.model.IndexSitemap;
 import io.github.concurrentrecursion.sitemap.model.Sitemap;
 import io.github.concurrentrecursion.sitemap.model.UrlSetSitemap;
@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -26,15 +26,6 @@ public interface Reader {
      * @return A list of UrlSetSitemap
      */
     List<UrlSetSitemap> readUrlSets(IndexSitemap index);
-
-    /**
-     * Reads the sitemaps from the given Robots instance.
-     *
-     * @param robots The Robots instance containing the sitemap URLs.
-     * @return A List of Sitemap objects representing the sitemaps.
-     * @throws IOException If there is an error reading the sitemaps.
-     */
-    List<Sitemap> readSitemaps(Robots robots) throws IOException;
 
     /**
      * Reads a sitemap index file from the specified URL.
@@ -90,31 +81,31 @@ public interface Reader {
      * Sets the connection timeout value. This is the maximum time that the reader will attempt to establish a connection
      * before throwing an exception.
      *
-     * @param connectionTimeout The connection timeout value in milliseconds.
+     * @param connectionTimeout The connection timeout value
      * @return Returns this reader object to allow for chaining of calls.
      */
-    Reader setConnectionTimeout(final int connectionTimeout);
+    Reader setConnectionTimeout(final Duration connectionTimeout);
 
     /**
      * Sets the read timeout value. This is the maximum time that the reader will read from the URL before throwing an exception.
      *
-     * @param readTimeout The read timeout value in milliseconds.
+     * @param readTimeout The read timeout value
      * @return Returns this reader object to allow for chaining of calls.
      */
-    Reader setReadTimeout(final int readTimeout);
+    Reader setReadTimeout(final Duration readTimeout);
 
     /**
      * Get the connection timeout value.
      *
-     * @return The connection timeout value in milliseconds.
+     * @return The connection timeout value
      */
-    int getConnectionTimeout();
+    Duration getConnectionTimeout();
 
     /**
      * Get the read timeout value.
      *
-     * @return The read timeout value in milliseconds.
+     * @return The read timeout value
      */
-    int getReadTimeout();
+    Duration getReadTimeout();
 
 }

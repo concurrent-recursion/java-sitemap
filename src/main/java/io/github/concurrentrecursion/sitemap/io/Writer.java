@@ -10,7 +10,7 @@ import java.nio.file.Path;
 /**
  * The Generator interface provides methods to generate sitemap files and configure various settings.
  */
-public interface Generator {
+public interface Writer {
     /**
      * Converts a {@link IndexSitemap} object to a string representation.
      *
@@ -23,10 +23,10 @@ public interface Generator {
      * Saves a {@link IndexSitemap} object to a file under a specified directory.
      *
      * @param index the {@link IndexSitemap} object to save
-     * @param directory the directory path to save the file
+     * @param file the file path to save the file
      * @throws IOException in case of any I/O failure
      */
-    void write(IndexSitemap index, Path directory) throws IOException;
+    void write(IndexSitemap index, Path file) throws IOException;
 
     /**
      * Converts a {@link UrlSetSitemap} object to a string representation.
@@ -51,7 +51,7 @@ public interface Generator {
      * @param prettyPrint a flag indicating whether the output should be pretty-printed
      * @return the Generator instance
      */
-    Generator setPrettyPrint(boolean prettyPrint);
+    Writer setPrettyPrint(boolean prettyPrint);
 
     /**
      * Gets whether the output should be pretty-printed.
@@ -66,7 +66,7 @@ public interface Generator {
      * @param gzip a flag indicating whether the output should be compressed using gzip
      * @return the Generator instance
      */
-    Generator useGzipCompression(boolean gzip);
+    Writer useGzipCompression(boolean gzip);
 
     /**
      * Gets whether the output should be compressed using gzip.
@@ -81,7 +81,7 @@ public interface Generator {
      * @param filenamePrefix the filename prefix
      * @return the Generator instance
      */
-    Generator setFilenamePrefix(String filenamePrefix);
+    Writer setFilenamePrefix(String filenamePrefix);
 
     /**
      * Gets the filename prefix for output files.
@@ -96,7 +96,7 @@ public interface Generator {
      * @param baseUrl the base URL as a string
      * @return the Generator instance
      */
-    Generator setBaseUrl(String baseUrl);
+    Writer setBaseUrl(String baseUrl);
 
     /**
      * Sets the base URL for all URLs in the sitemap.
@@ -104,7 +104,7 @@ public interface Generator {
      * @param baseUrl the base URL as a URL object
      * @return the Generator instance
      */
-    Generator setBaseUrl(URL baseUrl);
+    Writer setBaseUrl(URL baseUrl);
 
     /**
      * Gets the base URL for all URLs in the sitemap.

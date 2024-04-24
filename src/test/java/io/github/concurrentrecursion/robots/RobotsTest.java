@@ -1,54 +1,74 @@
 package io.github.concurrentrecursion.robots;
 
-import io.github.concurrentrecursion.UrlMockUtil;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+@WireMockTest(proxyMode = true)
 @Slf4j
 class RobotsTest {
 
     @Test
     void testRobotsWithSingleSitemap() throws Exception {
-        URL robotsUrl = UrlMockUtil.mockUrl(HttpURLConnection.HTTP_OK,() -> Thread.currentThread().getContextClassLoader().getResourceAsStream("simple-robots.txt"));
-
-        Robots robots = Robots.load(robotsUrl,100,1000);
-        assertEquals(1,robots.getSitemapUrls().size());
+        final String url = "http://www.example.com/robots.txt";
+        stubFor(get("/robots.txt")
+                .withHost(equalTo("www.example.com"))
+                .willReturn(ok()
+                        .withHeader("Content-Type", "text/plain")
+                        .withBodyFile("robots/simple-robots.txt")));
+        RobotsTxtReader robots = RobotsTxtReader.builder().build();
+        assertEquals(1,robots.getSitemapUrls(URI.create(url).toURL()).count());
     }
 
     @Test
     void testRobotsWithMultipleSitemaps() throws Exception {
-        URL robotsUrl = UrlMockUtil.mockUrl(HttpURLConnection.HTTP_OK,() -> Thread.currentThread().getContextClassLoader().getResourceAsStream("multi-sitemap-robots.txt"));
-
-        Robots robots = Robots.load(robotsUrl,100,1000);
-        assertEquals(6,robots.getSitemapUrls().size());
+        final String url = "http://www.example.com/robots.txt";
+        stubFor(get("/robots.txt").withHost(equalTo("www.example.com"))
+                .willReturn(ok()
+                        .withHeader("Content-Type", "text/plain")
+                        .withBodyFile("robots/multi-sitemap-robots.txt")));
+        RobotsTxtReader robots = RobotsTxtReader.builder().build();
+        assertEquals(6,robots.getSitemapUrls(URI.create(url).toURL()).count());
     }
 
     @Test
     void testRobotsNotFound() throws Exception{
-        URL robotsUrl = UrlMockUtil.mockUrl(HttpURLConnection.HTTP_NOT_FOUND,() -> null);
-        assertThrows(IOException.class,()-> Robots.load(robotsUrl,100,1000));
+        stubFor(get("/robots.txt").withHost(equalTo("www.example.com")).willReturn(notFound()));
+        RobotsTxtReader robots = RobotsTxtReader.builder().build();
+        assertEquals(0, robots.getSitemapUrls(URI.create("http://www.example.com/robots.txt").toURL()).count());
     }
 
-    @Disabled("testRobotsRedirect() needs to be manually tested with a real url because its hard to mock")
     @Test
     void testRobotsRedirect() throws Exception{
-        assertFalse(Robots.load(URI.create("some url that redirects").toURL(),100,1000).getSitemapUrls().isEmpty());
+        final String url = "http://www.example.com/robots.txt";
+        final String newUrl = "http://www.example.com/robots2.txt";
+
+        stubFor(get("/robots.txt").withHost(equalTo("www.example.com"))
+                .willReturn(temporaryRedirect(newUrl)));
+        stubFor(get("/robots2.txt").withHost(equalTo("www.example.com"))
+                .willReturn(ok()
+                .withHeader("Content-Type", "text/plain")
+                .withBodyFile("robots/multi-sitemap-robots.txt")));
+        RobotsTxtReader robots = RobotsTxtReader.builder().build();
+        assertNotEquals(0,robots.getSitemapUrls(URI.create(url).toURL()).count());
     }
 
     @Test
     void testNoSitemapsFound() throws Exception {
-        URL robotsUrl = UrlMockUtil.mockUrl(HttpURLConnection.HTTP_OK,() -> Thread.currentThread().getContextClassLoader().getResourceAsStream("no-sitemap-robots.txt"));
+        final String url = "http://www.example.com/robots.txt";
+        stubFor(get("/robots.txt").withHost(equalTo("www.example.com"))
+                .willReturn(ok()
+                        .withHeader("Content-Type", "text/plain")
+                        .withBodyFile("robots/no-sitemap-robots.txt")));
 
-        Robots robots = Robots.load(robotsUrl,100,1000);
-        assertEquals(0,robots.getSitemapUrls().size());
+        RobotsTxtReader robots = RobotsTxtReader.builder().build();
+        assertEquals(0,robots.getSitemapUrls(URI.create(url).toURL()).count());
     }
 
 }

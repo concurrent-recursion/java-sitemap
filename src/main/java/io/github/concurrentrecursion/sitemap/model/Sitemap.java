@@ -1,13 +1,15 @@
 package io.github.concurrentrecursion.sitemap.model;
 
+import java.nio.file.Path;
+
 /**
  * Represents either a UrlSet sitemap or a IndexSitemap
  */
 public interface Sitemap {
     /**
-     * Get the filename of the sitemap file.
+     * Get the location of the sitemap file.
      *
-     * @return The filename of the sitemap file.
+     * @return The location of the sitemap file.
      */
-    String getFilename();
+    Path getFile();
 }
