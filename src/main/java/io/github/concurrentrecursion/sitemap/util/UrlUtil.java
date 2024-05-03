@@ -31,4 +31,13 @@ public class UrlUtil {
             throw new RuntimeMalformedUrlException(e);
         }
     }
+
+    @NotNull
+    public URL resolve(@NotNull URL url, @NotNull String filename) throws RuntimeMalformedUrlException {
+        try {
+            return new URL(url, filename);
+        } catch (MalformedURLException e) {
+            throw new RuntimeMalformedUrlException(e);
+        }
+    }
 }

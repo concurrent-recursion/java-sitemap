@@ -1,10 +1,12 @@
 package io.github.concurrentrecursion.sitemap.model;
 
 import io.github.concurrentrecursion.sitemap.util.Streams;
+import io.github.concurrentrecursion.sitemap.util.UrlUtil;
 import jakarta.xml.bind.annotation.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -51,7 +53,12 @@ public class IndexSitemap implements Sitemap {
             batch.forEach(url -> sitemap.getUrls().add(url));
             return sitemap;
         }).collect(Collectors.toList());
-        this.sitemapReferences = urlSets.stream().map(urlSet -> new SitemapReference().setSitemap(urlSet).setLocation(sitemapDirectoryUrl)).collect(Collectors.toList());
+
+
+        this.sitemapReferences = urlSets.stream().map(urlSet -> new SitemapReference()
+                    .setSitemap(urlSet)
+                    .setLocation(UrlUtil.resolve(sitemapDirectoryUrl,urlSet.getFile().getFileName().toString()))
+                ).collect(Collectors.toList());
     }
 
     @XmlTransient
