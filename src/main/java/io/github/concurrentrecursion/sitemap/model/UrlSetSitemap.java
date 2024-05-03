@@ -42,7 +42,7 @@ public class UrlSetSitemap implements Sitemap {
     @XmlElement(required = true, name = "url")
     @Size(max = 50_000,groups = WriteValidation.class,message = "Maximum number of urls in a urlset is 50,000. Use IndexSitemap for more than 50,000 urls")
     @MaxNewsConstraint(groups = WriteValidation.class)
-    protected List<@Valid Url> urls = new ArrayList<>();
+    private List<@Valid Url> urls = new ArrayList<>();
 
     /**
      * Adds a Url to the Sitemap.

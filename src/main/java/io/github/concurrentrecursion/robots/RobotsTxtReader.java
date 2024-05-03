@@ -49,6 +49,15 @@ public class RobotsTxtReader {
         return httpClient.send(request, HttpResponse.BodyHandlers.ofLines());
     }
 
+    /**
+     * Retrieves a stream of URL objects representing the sitemap URLs found in the provided robots.txt URL.
+     *
+     * @param robotsTxtUrl The URL of the robots.txt file to parse for sitemap URLs.
+     * @return A stream of URL objects representing the sitemap URLs found in the robots.txt file.
+     * @throws IOException If an I/O error occurs while retrieving or parsing the robots.txt file.
+     * @throws URISyntaxException If the provided URL is not a valid URI.
+     * @throws InterruptedException If the thread is interrupted while waiting for the request to complete.
+     */
     public Stream<URL> getSitemapUrls(@NotNull final URL robotsTxtUrl) throws IOException, URISyntaxException, InterruptedException {
         final Pattern pattern = Pattern.compile("^Sitemap:\\s?(.*)");
 
@@ -66,6 +75,15 @@ public class RobotsTxtReader {
                 }).filter(Objects::nonNull);
     }
 
+    /**
+     * Retrieves all sitemaps from a given robots.txt URL.
+     *
+     * @param robotsTxtUrl the URL of the robots.txt file
+     * @return a stream of UrlSetSitemap objects representing the sitemaps
+     * @throws IOException              if an I/O error occurs
+     * @throws URISyntaxException       if the URI syntax is incorrect
+     * @throws InterruptedException    if the thread is interrupted
+     */
     public Stream<UrlSetSitemap> getAllSitemaps(@NotNull final URL robotsTxtUrl) throws IOException, URISyntaxException, InterruptedException {
         final SitemapReader reader = new SitemapReader();
         return getSitemapUrls(robotsTxtUrl).flatMap(surl -> {

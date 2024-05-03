@@ -32,6 +32,14 @@ public class UrlUtil {
         }
     }
 
+    /**
+     * Resolves a filename to a URL relative to a base URL.
+     *
+     * @param url       the base URL
+     * @param filename  the filename to be resolved
+     * @return the resolved URL
+     * @throws RuntimeMalformedUrlException if the resolved URL is malformed
+     */
     @NotNull
     public URL resolve(@NotNull URL url, @NotNull String filename) throws RuntimeMalformedUrlException {
         try {

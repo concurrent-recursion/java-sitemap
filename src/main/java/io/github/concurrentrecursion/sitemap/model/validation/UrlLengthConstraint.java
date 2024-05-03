@@ -8,6 +8,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * The UrlLengthConstraint annotation is used to apply a maximum length constraint on a URL
+ * field. It can be applied to any field with a URL data type.
+ */
 @Target(ElementType.FIELD)
 @Constraint(validatedBy = UrlLengthConstraintValidator.class)
 @Retention(RetentionPolicy.RUNTIME)

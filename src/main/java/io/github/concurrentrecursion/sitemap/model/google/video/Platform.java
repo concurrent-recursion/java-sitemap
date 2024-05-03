@@ -22,6 +22,9 @@ import java.util.List;
 @Accessors(chain = true)
 public class Platform {
 
+    /**
+     * Create a platform
+     */
     public Platform(){}
 
     /**
