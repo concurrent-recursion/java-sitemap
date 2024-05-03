@@ -61,6 +61,11 @@ public class IndexSitemap implements Sitemap {
                 ).collect(Collectors.toList());
     }
 
+    /**
+     * Represents a Path to a file.
+     * @param file the file
+     * @return file the file
+     */
     @XmlTransient
     private Path file = Paths.get("sitemap-index.xml");
 

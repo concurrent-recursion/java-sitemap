@@ -32,8 +32,23 @@ import java.util.stream.Stream;
 public class RobotsTxtReader {
     private static final int MAX_REDIRECTS = 20;
 
+    /**
+     * The connectionTimeout variable represents the duration of the connection timeout.
+     * By default, it is set to 3 seconds.
+     * @param connectionTimeout the timeout duration
+     * @return the timeout duration
+     */
     @Builder.Default
     private Duration connectionTimeout = Duration.ofSeconds(3);
+    /**
+     * The duration for the read timeout.
+     * <p>
+     * This variable specifies the duration after which a read operation will timeout.
+     * By default, the read timeout is set to 30 seconds.
+     * </p>
+     * @param readTimeout the read timeout
+     * @return the read timeout
+     */
     @Builder.Default
     private Duration readTimeout = Duration.ofSeconds(30);
 

@@ -28,8 +28,8 @@ import java.util.stream.Stream;
 public class UrlSetSitemap implements Sitemap {
     /**
      * The filename for this file, this is used when the generator saves the UrlSet
-     * @param filename the filename this Sitemap will be saved as
-     * @return the filename
+     * @param file the filepath where this urlset will be saved
+     * @return the file
      */
     @XmlTransient
     private Path file = Paths.get("sitemap.xml");
